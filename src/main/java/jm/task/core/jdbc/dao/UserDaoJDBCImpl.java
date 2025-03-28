@@ -6,7 +6,6 @@ import jm.task.core.jdbc.util.Util;
 import java.sql.*;
 import java.util.*;
 
-import static jm.task.core.jdbc.util.Util.getConnection;
 
 public class UserDaoJDBCImpl implements UserDao {
     private Connection connection = null;
@@ -31,14 +30,12 @@ public class UserDaoJDBCImpl implements UserDao {
     }
 
     public void dropUsersTable() {
-        String sql = "DROP TABLE users";
-        try{
-            Statement statement = connection.createStatement();
-            statement.executeUpdate("DROP TABLE IF EXISTS users");
-            } catch (Exception e) {
+        String sql = "DROP TABLE IF EXISTS users";
+        try (Statement statement = connection.createStatement()) {
+            statement.executeUpdate(sql);
+        } catch (Exception e) {
             System.out.println("Failed to drop table: " + e.getMessage());
         }
-
     }
 
     public void saveUser(String name, String lastName, byte age) {
@@ -84,7 +81,6 @@ public class UserDaoJDBCImpl implements UserDao {
                 user.setLastName(resultSet.getString("lastName"));
                 user.setAge(resultSet.getByte("age"));
                 users.add(user);
-                System.out.println(user);
             }
         } catch(SQLException e){
             System.out.println("Connection failed");
@@ -96,7 +92,6 @@ public class UserDaoJDBCImpl implements UserDao {
     public void cleanUsersTable() {
     try (PreparedStatement ps = connection.prepareStatement("DELETE FROM users")) {
         ps.executeUpdate();
-        System.out.println("Table 'users' has been cleaned successfully");
     }catch (SQLException e) {
         System.out.println("Connection failed");
         System.out.println(e);
