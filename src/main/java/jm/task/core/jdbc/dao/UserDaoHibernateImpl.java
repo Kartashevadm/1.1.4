@@ -31,14 +31,8 @@ public class UserDaoHibernateImpl implements UserDao {
 
         try (Session session = getSessionFactory().openSession()) {
             Transaction transaction = session.beginTransaction();
-            try {
-                Query query = session.createSQLQuery(sql).addEntity(User.class);
-                query.executeUpdate();
-                transaction.commit();
-            } catch (Exception e) {
-                transaction.rollback();
-                System.out.println("Failed to create table: " + e.getMessage());
-            }
+            session.createSQLQuery(sql).executeUpdate();
+            transaction.commit();
         } catch (Exception e) {
             System.out.println("Failed to create table: " + e.getMessage());
         }
@@ -51,14 +45,8 @@ public class UserDaoHibernateImpl implements UserDao {
 
         try (Session session = getSessionFactory().openSession()) {
             Transaction transaction = session.beginTransaction();
-            try {
-                Query query = session.createSQLQuery(sql);
-                query.executeUpdate();
-                transaction.commit();
-            } catch (Exception e) {
-                transaction.rollback();
-                System.out.println("Failed to drop table: " + e.getMessage());
-            }
+            session.createSQLQuery(sql).executeUpdate();
+            transaction.commit();
         } catch (Exception e) {
             System.out.println("Failed to drop table: " + e.getMessage());
         }
@@ -74,13 +62,8 @@ public class UserDaoHibernateImpl implements UserDao {
 
         try (Session session = getSessionFactory().openSession()) {
             Transaction transaction = session.beginTransaction();
-            try {
-                session.save(user);
-                transaction.commit(); // Коммит, если успешно
-            } catch (Exception e) {
-                transaction.rollback(); // Откат в случае исключения
-                System.out.println("Failed to save user: " + e.getMessage());
-            }
+            session.save(user);
+            transaction.commit();
         } catch (Exception e) {
             System.out.println("Failed to save user: " + e.getMessage());
         }
@@ -91,18 +74,13 @@ public class UserDaoHibernateImpl implements UserDao {
     public void removeUserById(long id) {
         try (Session session = getSessionFactory().openSession()) {
             Transaction transaction = session.beginTransaction();
-            try {
-                User user = session.get(User.class, id);
-                if (user != null) {
-                    session.delete(user);
-                    transaction.commit();
-                } else {
-                    System.out.println("User  with id \" + id + \" not found.");
-                    transaction.rollback();
-                }
-            } catch (Exception e) {
+            User user = (User) session.get(User.class, id);
+            if (user != null) {
+                session.delete(user);
+                transaction.commit();
+            } else {
+                System.out.println("User  with id \" + id + \" not found.");
                 transaction.rollback();
-                System.out.println("Failed to remove user: " + e.getMessage());
             }
         } catch (Exception e) {
             System.out.println("Failed to remove user: " + e.getMessage());
@@ -117,14 +95,8 @@ public class UserDaoHibernateImpl implements UserDao {
         String sql = "SELECT * FROM users";
         try (Session session = getSessionFactory().openSession()) {
             Transaction transaction = session.beginTransaction();
-            try {
-                Query query = session.createSQLQuery(sql).addEntity(User.class);
-                users = query.getResultList();
-                transaction.commit();
-            } catch (Exception e) {
-                transaction.rollback();
-                System.out.println("Failed to get all users: " + e.getMessage());
-            }
+            users = session.createSQLQuery(sql).addEntity(User.class).getResultList();
+            transaction.commit();
         } catch (Exception e) {
             System.out.println("Failed to get all users: " + e.getMessage());
         }
@@ -136,15 +108,8 @@ public class UserDaoHibernateImpl implements UserDao {
     public void cleanUsersTable() {
         try (Session session = getSessionFactory().openSession()) {
             Transaction transaction = session.beginTransaction();
-            try {
-                String sql = "DELETE FROM users";
-                Query query = session.createSQLQuery(sql);
-                query.executeUpdate();
-                transaction.commit();
-            } catch (Exception e) {
-                transaction.rollback();
-                System.out.println("Failed to clean table: " + e.getMessage());
-            }
+            session.createSQLQuery("DROP TABLE IF EXISTS users").executeUpdate();
+            transaction.commit();
         } catch (Exception e) {
             System.out.println("Failed to clean table: " + e.getMessage());
         }
